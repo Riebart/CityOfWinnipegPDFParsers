@@ -40,7 +40,9 @@ def clean_line_salaries(l):
 def parse(lines):
     depts = list()
     salaries = list()
-    i = 0
+    service = clean_line_salaries(lines[0])[0].strip()
+
+    i = 1
     while "Operating Budget" not in lines[i]:
         depts.append(clean_line_depts(lines[i]))
         i += 1
@@ -66,17 +68,18 @@ def parse(lines):
         salaries.append(clean_line_salaries(lines[i]))
         i += 1
 
-    return dict(depts=depts, salaries=dict(zip(SALARY_COLUMNS, salaries)))
+    return (service,
+            dict(depts=depts, salaries=dict(zip(SALARY_COLUMNS, salaries))))
 
 
 html_lines = [l.strip() for l in sys.stdin.read().split("\n")]
 
-salaries = list()
+data = dict()
 
 for i in range(len(html_lines)):
     l = html_lines[i]
     if test(l):
-        data = parse(html_lines[i:])
-        salaries.append(data)
+        datum = parse(html_lines[i - 1:])
+        data[datum[0]] = datum[1]
 
-print(json.dumps(salaries))
+print(json.dumps(data))
